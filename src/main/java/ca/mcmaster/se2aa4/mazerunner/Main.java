@@ -27,7 +27,8 @@ public class Main {
             Explorer explorer = new Explorer(maze);
 
             logger.info("**** Computing path");
-            explorer.exploreMaze();
+            // explorer.exploreMaze();
+            explorer.exploreRightHandRule();
 
             // logger.warn("PATH NOT COMPUTED");
         } catch (Exception e) {

@@ -8,57 +8,56 @@ import java.util.List;
 public class Explorer {
     private static final Logger logger = LogManager.getLogger();
 
-    private Maze mazeMap;
-    private int[] currentLocation;
-    private int[] startPoint;
-    private int[] endPoint;
-    private boolean[][] exploredCells;
-    private List<String> pathSteps;
-    private int orientation = 0; // orientation, 0: Right, 1: Down, 2: Left, 3: Up
+    private Maze maze;
+    private int[] currentPos;
+    private int[] start;
+    private int[] end;
+    private boolean[][] visited;
+    private List<String> moves;
+    private int direction = 0; // orientation, 0: Right, 1: Down, 2: Left, 3: Up
 
     public Explorer(Maze mazeMap) {
-        this.mazeMap = mazeMap;
-        this.exploredCells = new boolean[mazeMap.getRows()][mazeMap.getCols()];
-        this.currentLocation = mazeMap.getLeftOpening();
-        this.startPoint = currentLocation;
-        this.endPoint = mazeMap.getRightOpening();
-        this.pathSteps = new ArrayList<>();
-        this.orientation = 0;
+        this.maze = mazeMap;
+        this.visited = new boolean[mazeMap.getRows()][mazeMap.getCols()];
+        this.currentPos = mazeMap.getLeftOpening();
+        this.start = currentPos;
+        this.end = mazeMap.getRightOpening();
+        this.moves = new ArrayList<>();
+        this.direction = 0;
     }
 
     public void exploreMaze() {
-        if (currentLocation == null) {
+        if (currentPos == null) {
             logger.error("No valid starting point found in the maze.");
             return;
         }
 
-        logger.info("Starting exploration at position: ({}, {})", currentLocation[0], currentLocation[1]);
+        logger.info("Starting exploration at position: ({}, {})", currentPos[0], currentPos[1]);
 
-        while (stepForward()) {
-            pathSteps.add("F");
-            logger.trace("Moved forward to position: ({}, {})", currentLocation[0], currentLocation[1]);
-            if (currentLocation[0] == endPoint[0] && currentLocation[1] == endPoint[1]) {
+        while (moveForward()) {
+            logger.trace("Moved forward to position: ({}, {})", currentPos[0], currentPos[1]);
+            if (currentPos[0] == end[0] && currentPos[1] == end[1]) {
                 break;
             }
         }
 
-        logger.info("Explorer stopped at position: ({}, {})", currentLocation[0], currentLocation[1]);
+        logger.info("Explorer stopped at position: ({}, {})", currentPos[0], currentPos[1]);
 
-        logger.info("Final moves: {}", String.join("", pathSteps));
+        logger.info("Final moves: {}", String.join("", moves));
     }
 
     private boolean isValidPosition(int x, int y) {
-        boolean inBoundary = x >= 0 && x < mazeMap.getCols() && y >= 0 && y < mazeMap.getRows();
-        boolean isPath = mazeMap.getGridAt(x, y) != '#';
+        boolean inBoundary = x >= 0 && x < maze.getCols() && y >= 0 && y < maze.getRows();
+        boolean isPath = maze.getGridAt(x, y) != '#';
         return inBoundary && isPath;
     }
 
-    private boolean stepForward() {
-        int nextX = currentLocation[0];
-        int nextY = currentLocation[1];
+    private boolean moveForward() {
+        int nextX = currentPos[0];
+        int nextY = currentPos[1];
 
-        if (currentLocation[0] != endPoint[0] || currentLocation[1] != endPoint[1]) {
-            switch (orientation) {
+        if (currentPos[0] != end[0] || currentPos[1] != end[1]) {
+            switch (direction) {
                 case 0:
                     nextX++;
                     break; // Move right
@@ -78,7 +77,8 @@ public class Explorer {
         }
 
         if (isValidPosition(nextX, nextY)) {
-            currentLocation = new int[] { nextX, nextY };
+            currentPos = new int[] { nextX, nextY };
+            moves.add("F");
             return true;
         }
 
@@ -87,26 +87,111 @@ public class Explorer {
     }
 
     private void rotateRight() {
-        orientation = (orientation + 1) % 4;
+        direction = (direction + 1) % 4;
         logger.trace("Turning Right");
-        stepForward();
+        moveForward();
     }
 
     private void rotateLeft() {
-        orientation = (orientation + 3) % 4;
+        direction = (direction + 3) % 4;
         logger.trace("Turning Left");
-        stepForward();
+        moveForward();
     }
 
     public int[] getCurrentPosition() {
-        return currentLocation;
+        return currentPos;
     }
 
     public boolean[][] getExploredCells() {
-        return exploredCells;
+        return visited;
     }
 
     public List<String> getPathSteps() {
-        return pathSteps;
+        return moves;
+    }
+
+    public void exploreRightHandRule() {
+        if (currentPos == null) {
+            logger.error("No valid start point foiund in maze!");
+        }
+
+        logger.info("Starting right-hand rule exploration at position: ({}, {})", currentPos[0], currentPos[1]);
+
+        while (!reachedEnd()) {
+            if (canMoveRight()) {
+                turnRight();
+                moveForward();
+            } else if (canMoveForward()) {
+                moveForward();
+            } else if (canMoveLeft()) {
+                turnLeft();
+                moveForward();
+            } else { // for dead-ends
+                turnAround();
+                moveForward();
+            }
+        }
+
+        logger.info("Explorer stopped at position: ({}, {})", currentPos[0], currentPos[1]);
+        logger.info("Final moves: {}", String.join("", moves));
+    }
+
+    private boolean reachedEnd() {
+        return currentPos[0] == end[0] && currentPos[1] == end[1];
+    }
+
+    private boolean canMoveForward() {
+        int newX = currentPos[0];
+        int newY = currentPos[1];
+
+        switch (direction) {
+            case 0:
+                newX++;
+                break;
+            case 1:
+                newY++;
+                break;
+            case 2:
+                newX--;
+                break;
+            case 3:
+                newY--;
+                break;
+        }
+        return isValidMove(newX, newY);
+    }
+
+    private boolean canMoveRight() {
+        direction = (direction + 1) % 4;
+        boolean canMove = canMoveForward();
+        direction = (direction + 3) % 4;
+        return canMove;
+    }
+
+    private boolean canMoveLeft() {
+        direction = (direction + 3) % 4;
+        boolean canMove = canMoveForward();
+        direction = (direction + 1) % 4;
+        return canMove;
+    }
+
+    private void turnRight() {
+        direction = (direction + 1) % 4;
+        moves.add("R");
+    }
+
+    private void turnLeft() {
+        direction = (direction + 3) % 4;
+        moves.add("L");
+    }
+
+    private void turnAround() {
+        direction = (direction + 2) % 4;
+        moves.add("L");
+        moves.add("L");
+    }
+
+    private boolean isValidMove(int x, int y) {
+        return isValidPosition(x, y);
     }
 }
