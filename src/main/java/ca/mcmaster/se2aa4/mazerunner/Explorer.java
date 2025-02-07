@@ -112,7 +112,7 @@ public class Explorer {
 
     public void exploreRightHandRule() {
         if (currentPos == null) {
-            logger.error("No valid start point foiund in maze!");
+            logger.error("No valid start point found in maze!");
         }
 
         logger.info("Starting right-hand rule exploration at position: ({}, {})", currentPos[0], currentPos[1]);

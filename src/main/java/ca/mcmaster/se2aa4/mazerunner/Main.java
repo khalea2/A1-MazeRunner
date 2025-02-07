@@ -2,6 +2,7 @@ package ca.mcmaster.se2aa4.mazerunner;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ca.mcmaster.se2aa4.mazerunner.Path;
 
 public class Main {
 
@@ -18,7 +19,17 @@ public class Main {
         }
 
         String inputFilePath = inputHandler.getInputFilePath();
+        String inputPath = inputHandler.getMazePath();
+
         if (inputFilePath == null) {
+            logger.error("Failed to read File Path.");
+            return;
+        }
+
+        if (inputPath == null) {
+            logger.info("No path provided.");
+        } else {
+            Path path = new Path(inputPath);
             return;
         }
 

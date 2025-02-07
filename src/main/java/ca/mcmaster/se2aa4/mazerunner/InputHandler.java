@@ -13,7 +13,7 @@ public class InputHandler {
     public InputHandler() {
         cliOpts = new Options();
         cliOpts.addOption("i", "input", true, "Path to the maze input file");
-        cliOpts.addOption("p", "Path", true, "Solve maze based on inputted path");
+        cliOpts.addOption("p", "path", true, "Solve maze based on inputted path");
     }
 
     public boolean parseArgs(String[] args) {
@@ -40,7 +40,7 @@ public class InputHandler {
         if (cmdArgs != null && cmdArgs.hasOption("p")) {
             return cmdArgs.getOptionValue("p");
         } else {
-            logger.error("/!\\ Missing required -p flag for input file /!\\");
+            logger.error("/!\\ Missing required -p flag for inputted path /!\\");
             return null;
         }
     }
