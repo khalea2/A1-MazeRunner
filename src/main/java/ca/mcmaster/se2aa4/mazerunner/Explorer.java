@@ -37,6 +37,9 @@ public class Explorer {
         while (stepForward()) {
             pathSteps.add("F");
             logger.trace("Moved forward to position: ({}, {})", currentLocation[0], currentLocation[1]);
+            if (currentLocation[0] == endPoint[0] && currentLocation[1] == endPoint[1]) {
+                break;
+            }
         }
 
         logger.info("Explorer stopped at position: ({}, {})", currentLocation[0], currentLocation[1]);
@@ -54,19 +57,24 @@ public class Explorer {
         int nextX = currentLocation[0];
         int nextY = currentLocation[1];
 
-        switch (orientation) {
-            case 0:
-                nextX++;
-                break; // Move right
-            case 1:
-                nextY++;
-                break; // Move down
-            case 2:
-                nextX--;
-                break; // Move left
-            case 3:
-                nextY--;
-                break; // Move up
+        if (currentLocation[0] != endPoint[0] || currentLocation[1] != endPoint[1]) {
+            switch (orientation) {
+                case 0:
+                    nextX++;
+                    break; // Move right
+                case 1:
+                    nextY++;
+                    break; // Move down
+                case 2:
+                    nextX--;
+                    break; // Move left
+                case 3:
+                    nextY--;
+                    break; // Move up
+            }
+        } else {
+            logger.trace("Reached end!");
+            return false;
         }
 
         if (isValidPosition(nextX, nextY)) {
