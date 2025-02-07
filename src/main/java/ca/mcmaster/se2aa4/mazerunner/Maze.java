@@ -6,10 +6,14 @@ import java.io.IOException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+// represents the maze structure and handles maze file loading
 public class Maze {
+    // maze structure as a 2D char array
     private char[][] grid;
     private int rows;
     private int cols;
+
+    // coordinates for maze entrance and exit
     private int[] leftOpening;
     private int[] rightOpening;
 
@@ -24,6 +28,7 @@ public class Maze {
         }
     }
 
+    // loads and validates maze from file
     private void loadMaze(String filePath) throws IOException {
         logger.info("Loading Maze");
         BufferedReader reader = null;
@@ -31,11 +36,10 @@ public class Maze {
             reader = new BufferedReader(new FileReader(filePath));
             String line;
             rows = 0;
-            logger.info("**** Reading the maze from file: {}", filePath);
             // first pass: get the grid dimensions
             while ((line = reader.readLine()) != null) {
-                cols = line.length();
-                rows++;
+                cols = line.length(); // use first line to determine width
+                rows++; // count total lines for height
             }
         } catch (IOException e) {
             logger.error("Error determining the grid dimensions from file: {}. Error: {}", filePath, e.getMessage());
@@ -43,22 +47,22 @@ public class Maze {
         }
         reader.close();
 
-        // second pass: fill the grid and log each line
+        // second pass: populate the grid
         try {
             grid = new char[rows][cols];
             reader = new BufferedReader(new FileReader(filePath));
             String line;
             int row = 0;
             while ((line = reader.readLine()) != null) {
-                grid[row] = line.toCharArray();
+                grid[row] = line.toCharArray(); // convert each line to char array for maze representation
                 row++;
 
                 StringBuilder output = new StringBuilder();
                 for (int idx = 0; idx < line.length(); idx++) {
                     if (line.charAt(idx) == '#') {
-                        output.append("WALL ");
+                        output.append("WALL "); // mark walls for logging
                     } else if (line.charAt(idx) != '#') {
-                        output.append("PASS ");
+                        output.append("PASS "); // mark passages for logging
                     }
                 }
                 logger.trace(output.toString());
@@ -70,8 +74,8 @@ public class Maze {
         reader.close();
     }
 
+    // identifies entrance and exit points on maze borders
     public void getOpenings() {
-
         for (int row = 0; row < rows; row++) {
             if (grid[row][0] == ' ') {
                 this.leftOpening = new int[] { 0, row };

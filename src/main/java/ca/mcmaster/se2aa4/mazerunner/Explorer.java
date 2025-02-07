@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+// handles maze traversal and path finding logic
 public class Explorer { // Explorer class for exploring the maze
     private static final Logger logger = LogManager.getLogger();
 
@@ -14,7 +15,8 @@ public class Explorer { // Explorer class for exploring the maze
     private int[] end;
     private boolean[][] visited;
     private List<String> moves;
-    private int direction = 0; // orientation, 0: Right, 1: Down, 2: Left, 3: Up
+    // direction represents current facing: 0=right, 1=down, 2=left, 3=up
+    private int direction = 0;
 
     public Explorer(Maze mazeMap) { // constructor for the Explorer class
         this.maze = mazeMap;
@@ -46,13 +48,15 @@ public class Explorer { // Explorer class for exploring the maze
         logger.info("Final moves: {}", String.join("", moves));
     }
 
-    private boolean isValidPosition(int x, int y) { // check if the position is valid
+    // checks if a position is within bounds and not a wall
+    private boolean isValidPosition(int x, int y) {
         boolean inBoundary = x >= 0 && x < maze.getCols() && y >= 0 && y < maze.getRows();
         boolean isPath = maze.getGridAt(x, y) != '#';
         return inBoundary && isPath;
     }
 
-    private boolean moveForward() { // move forward method
+    // attempts to move forward in current direction
+    private boolean moveForward() {
         int nextX = currentPos[0];
         int nextY = currentPos[1];
 
@@ -68,17 +72,16 @@ public class Explorer { // Explorer class for exploring the maze
             }
         } else {
             logger.trace("Reached end!");
-            return false;
+            return false; // stop moving if we've reached the end
         }
 
         if (isValidPosition(nextX, nextY)) {
-            currentPos = new int[] { nextX, nextY };
-            moves.add("F");
+            currentPos = new int[] { nextX, nextY }; // update position only if the move is valid
+            moves.add("F"); // record the forward movement
             return true;
         }
 
-        logger.warn("Hit a wall at position: ({}, {})", nextX, nextY);
-        return false;
+        return false; // return false if we hit a wall or invalid position
     }
 
     private void rotateRight() {
@@ -105,6 +108,7 @@ public class Explorer { // Explorer class for exploring the maze
         return moves;
     }
 
+    // implements right-hand rule maze solving algorithm
     public void exploreRightHandRule() { // explore the maze using the right-hand rule
         if (currentPos == null) {
             logger.error("No valid start point found in maze!");
@@ -131,6 +135,7 @@ public class Explorer { // Explorer class for exploring the maze
         logger.info("Final moves: {}", String.join("", moves));
     }
 
+    // validates and executes a sequence of moves from input
     public boolean solveMazeFromInput(String input) { // attempt to navigate maze using sequence of instructions
         int stepsTaken = 0; // tracks number of instructions executed
         if (input == null || input.isEmpty()) {
@@ -172,6 +177,7 @@ public class Explorer { // Explorer class for exploring the maze
         return currentPos[0] == end[0] && currentPos[1] == end[1];
     }
 
+    // helper methods for checking possible moves in different directions
     private boolean canMoveForward() {
         int newX = currentPos[0];
         int newY = currentPos[1];
@@ -189,9 +195,9 @@ public class Explorer { // Explorer class for exploring the maze
     }
 
     private boolean canMoveRight() {
-        direction = (direction + 1) % 4;
+        direction = (direction + 1) % 4; // temporarily rotate right to check that direction
         boolean canMove = canMoveForward();
-        direction = (direction + 3) % 4;
+        direction = (direction + 3) % 4; // rotate back to original direction
         return canMove;
     }
 
