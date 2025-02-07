@@ -24,12 +24,15 @@ public class Main {
 
         try {
             Maze maze = new Maze(inputFilePath);
+            Explorer explorer = new Explorer(maze);
 
+            logger.info("**** Computing path");
+            explorer.exploreMaze();
+
+            // logger.warn("PATH NOT COMPUTED");
         } catch (Exception e) {
             logger.error("/!\\ An error has occurred /!\\");
         }
-        logger.info("**** Computing path");
-        logger.warn("PATH NOT COMPUTED");
         logger.info("** End of MazeRunner");
     }
 }
