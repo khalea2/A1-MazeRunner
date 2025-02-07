@@ -30,6 +30,7 @@ public class InputHandler {
         if (cmdArgs != null && cmdArgs.hasOption("i")) {
             return cmdArgs.getOptionValue("i");
         } else {
+            logger.error("No input file provided");
             return null;
         }
     }
