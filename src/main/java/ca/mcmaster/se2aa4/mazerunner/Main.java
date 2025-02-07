@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.commons.cli.*;
 
 public class Main {
 
@@ -14,22 +13,20 @@ public class Main {
     public static void main(String[] args) {
         logger.info("** Starting Maze Runner");
 
-        Options cliOptions = new Options();
-        cliOptions.addOption("i", "input", true, "Input to maze runner");
+        InputHandler inputProcessor = new InputHandler();
 
-        CommandLineParser argsParser = new DefaultParser();
-        HelpFormatter helpDisplay = new HelpFormatter();
+        if (!inputProcessor.parseArgs(args)) {
+            logger.error("Failed to parse command-line arguments.");
+            return;
+        }
 
+        String mazeFilePath = inputProcessor.getInputFilePath();
+
+        if (mazeFilePath == null) {
+            logger.error("/!\\ Missing required -i flag for input file /!\\");
+            return;
+        }
         try {
-            CommandLine cmdArgs = argsParser.parse(cliOptions, args);
-
-            if (!cmdArgs.hasOption("i")) {
-                logger.error("/!\\ Missing required -i flag for input file /!\\");
-                helpDisplay.printHelp("MazeRunner", cliOptions);
-                return;
-            }
-
-            String mazeFilePath = cmdArgs.getOptionValue("i");
             logger.info("**** Reading the maze from file: {}", mazeFilePath);
 
             BufferedReader fileReader = new BufferedReader(new FileReader(mazeFilePath));
