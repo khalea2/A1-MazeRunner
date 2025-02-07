@@ -1,8 +1,9 @@
 package ca.mcmaster.se2aa4.mazerunner;
 
+import java.util.Arrays;
+import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import ca.mcmaster.se2aa4.mazerunner.Path;
 
 public class Main {
 
@@ -10,12 +11,14 @@ public class Main {
 
     public static void main(String[] args) {
         logger.info("** Starting Maze Runner");
+        System.out.println("Starting Maze Runner");
 
         InputHandler inputHandler = new InputHandler();
 
         if (!inputHandler.parseArgs(args)) {
             logger.error("Failed to parse command-line arguments.");
             return;
+
         }
 
         String inputFilePath = inputHandler.getInputFilePath();
@@ -26,25 +29,46 @@ public class Main {
             return;
         }
 
+        Maze maze = new Maze(inputFilePath);
+        Explorer explorer = new Explorer(maze);
+
         if (inputPath == null) {
             logger.info("No path provided.");
         } else {
+            System.out.println("Solving maze with path");
+            System.out.println("Starting maze at: " + Arrays.toString(maze.getLeftOpening()));
             Path path = new Path(inputPath);
+
+            System.out.println("Inputted canonical path: " + path.getFormattedInputtedPath());
+            System.out.println("Inputted factorized path: " + path.getFactorizedInputtedPath());
+
+            MazeValidator mazeValidator = new MazeValidator(maze, explorer, path);
+            if (mazeValidator.getIsValid()) {
+                System.out.println("Maze solved successfully with inputted path.");
+            } else {
+                System.out.println("Maze not solved with inputted path!");
+                System.out.println("Maze runner stopped at: " + Arrays.toString(explorer.getCurrentPosition()));
+            }
             return;
         }
 
         try {
-            Maze maze = new Maze(inputFilePath);
-            Explorer explorer = new Explorer(maze);
-
+            System.out.println("Starting maze at: " + Arrays.toString(maze.getLeftOpening()));
+            System.out.println("Starting right hand rule");
             logger.info("**** Computing path");
-            // explorer.exploreMaze();
-            explorer.exploreRightHandRule();
 
-            // logger.warn("PATH NOT COMPUTED");
+            explorer.exploreRightHandRule();
+            List<String> moves = explorer.getPathSteps();
+            Path path = new Path(moves);
+
+            System.out.println("Maze solved!");
+            System.out.println("Final canonical path: " + path.getFormattedPath());
+            System.out.println("Final factorized path: " + path.getFactorizedPath());
+
         } catch (Exception e) {
-            logger.error("/!\\ An error has occurred /!\\");
+            logger.error("/!\\ An error has occurred /!\\ Error:{}", e.getMessage());
         }
+
         logger.info("** End of MazeRunner");
     }
 }

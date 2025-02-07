@@ -40,7 +40,7 @@ public class InputHandler {
         if (cmdArgs != null && cmdArgs.hasOption("p")) {
             return cmdArgs.getOptionValue("p");
         } else {
-            logger.error("/!\\ Missing required -p flag for inputted path /!\\");
+            logger.info("No path provided");
             return null;
         }
     }
